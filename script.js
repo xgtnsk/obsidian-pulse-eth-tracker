@@ -370,6 +370,9 @@ async function scanNewBlocks() {
     try {
         const latest = await fetchLatestBlock();
         if (latest && latest > state.currentBlock) {
+            // New blocks detected! Update chart candles first
+            await fetchChartData();
+
             if (state.currentBlock === 0) {
                 state.currentBlock = latest;
             } else {
