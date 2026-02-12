@@ -151,7 +151,7 @@ async function initChart() {
     });
     resizeObserver.observe(document.getElementById('chart-container'));
 
-    state.candleSeries = state.chart.addSeries(LightweightCharts.CandlestickSeries, {
+    state.candleSeries = state.chart.addCandlestickSeries({
         upColor: '#10b981',
         downColor: '#ef4444',
         borderVisible: false,
@@ -159,7 +159,7 @@ async function initChart() {
         wickDownColor: '#ef4444',
     });
 
-    state.volumeSeries = state.chart.addSeries(LightweightCharts.HistogramSeries, {
+    state.volumeSeries = state.chart.addHistogramSeries({
         color: '#e2e8f0',
         priceFormat: { type: 'volume' },
         priceScaleId: '',
@@ -252,8 +252,13 @@ function addChartMarker(valueEth, address, blockTime, skipUpdate = false) {
     if (!skipUpdate) {
         // Sort markers by time (required by Lightweight Charts)
         state.markers.sort((a, b) => a.time - b.time);
-        // Apply markers to the series
-        state.candleSeries.setMarkers(state.markers);
+        try {
+            if (state.candleSeries && typeof state.candleSeries.setMarkers === 'function') {
+                state.candleSeries.setMarkers(state.markers);
+            }
+        } catch (e) {
+            console.warn("Could not set markers:", e);
+        }
     }
 }
 
@@ -348,6 +353,7 @@ function addTransactionToFeed(tx, valueEth) {
     if (empty) empty.remove();
 
     elements.txFeed.prepend(item);
+    lucide.createIcons(); // Initialize icons for the new item
 }
 
 async function scanNewBlocks() {
