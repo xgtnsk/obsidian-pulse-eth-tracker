@@ -41,7 +41,8 @@ let state = {
     candleSeries: null,
     volumeSeries: null,
     markers: [],
-    isHistoryMode: false
+    isHistoryMode: false,
+    processedHashes: new Set()
 };
 
 // DOM Elements
@@ -204,6 +205,13 @@ async function fetchChartData() {
 
             state.candleSeries.setData(candles);
             state.volumeSeries.setData(volumes);
+
+            // Re-apply markers after data update to ensure they are visible
+            if (state.markers.length > 0) {
+                state.markers.sort((a, b) => a.time - b.time);
+                state.candleSeries.setMarkers(state.markers);
+            }
+
             state.chart.timeScale().fitContent();
         }
     } catch (e) {
@@ -310,6 +318,9 @@ function getDisplayAddress(address) {
 }
 
 function addTransactionToFeed(tx, valueEth) {
+    if (state.processedHashes.has(tx.hash)) return;
+    state.processedHashes.add(tx.hash);
+
     const time = new Date().toLocaleTimeString();
     const item = document.createElement('div');
     item.className = 'tx-item';
@@ -364,6 +375,9 @@ async function scanNewBlocks() {
                             if (state.filterExchanges && (isExchangeWallet(tx.from) || isExchangeWallet(tx.to || ''))) {
                                 return;
                             }
+
+                            // Avoid duplicates globally
+                            if (state.processedHashes.has(tx.hash)) return;
 
                             addTransactionToFeed(tx, val);
                             updateStats(val);
