@@ -40,7 +40,7 @@ let state = {
     chart: null,
     candleSeries: null,
     volumeSeries: null,
-    markers: [],
+    rawMarkers: [], // Store original tx data for dynamic re-calculation
     isHistoryMode: false,
     processedHashes: new Set()
 };
@@ -207,10 +207,11 @@ async function fetchChartData() {
             state.volumeSeries.setData(volumes);
 
             // Re-apply markers after data update to ensure they are visible
-            if (state.markers.length > 0) {
-                state.markers.sort((a, b) => a.time - b.time);
-                state.candleSeries.setMarkers(state.markers);
-            }
+            state.candleSeries.setData(candles);
+            state.volumeSeries.setData(volumes);
+
+            // Recalculate and re-apply markers for the current timeframe
+            applyMarkers(state.timeframe);
 
             state.chart.timeScale().fitContent();
         }
@@ -220,45 +221,51 @@ async function fetchChartData() {
 }
 
 function addChartMarker(valueEth, address, blockTime, skipUpdate = false) {
-    if (!state.candleSeries) return;
-
-    // Use block timestamp if provided.
-    // CRITICAL: Do NOT fallback to Date.now() if blockTime is missing/invalid, 
-    // as this causes historical transactions to appear on the current candle.
-    let markerTime = blockTime;
-
-    if (!markerTime) {
-        console.warn("Skipping marker due to missing timestamp", address);
-        return;
-    }
-
-    // Round time to the nearest interval to ensure it snaps to a candle
-    // IMPORTANT: Snap to the BEGINNING of the period to match CryptoCompare data
-    if (state.timeframe === 'minute') markerTime = Math.floor(markerTime / 60) * 60;
-    else if (state.timeframe === 'hour') markerTime = Math.floor(markerTime / 3600) * 3600;
-    else if (state.timeframe === 'day') markerTime = Math.floor(markerTime / 86400) * 86400;
+    if (!state.candleSeries || !blockTime) return;
 
     const alias = state.aliases[address.toLowerCase()] || address.substring(0, 6) + '...';
 
-    state.markers.push({
-        time: markerTime,
-        position: 'aboveBar',
-        color: '#ef4444', // Red
-        shape: 'arrowDown',
-        text: `${valueEth.toFixed(0)} ETH (${alias})`,
-        size: 2
+    // Store raw marker data
+    state.rawMarkers.push({
+        rawTime: blockTime,
+        valueEth: valueEth,
+        alias: alias
     });
 
     if (!skipUpdate) {
-        // Sort markers by time (required by Lightweight Charts)
-        state.markers.sort((a, b) => a.time - b.time);
-        try {
-            if (state.candleSeries && typeof state.candleSeries.setMarkers === 'function') {
-                state.candleSeries.setMarkers(state.markers);
-            }
-        } catch (e) {
-            console.warn("Could not set markers:", e);
+        applyMarkers(state.timeframe);
+    }
+}
+
+function applyMarkers(tf) {
+    if (!state.candleSeries || state.rawMarkers.length === 0) return;
+
+    const displayMarkers = state.rawMarkers.map(m => {
+        let markerTime = m.rawTime;
+        // Adjust for current timeframe
+        if (tf === 'minute') markerTime = Math.floor(markerTime / 60) * 60;
+        else if (tf === 'hour') markerTime = Math.floor(markerTime / 3600) * 3600;
+        else if (tf === 'day') markerTime = Math.floor(markerTime / 86400) * 86400;
+
+        return {
+            time: markerTime,
+            position: 'aboveBar',
+            color: '#ef4444',
+            shape: 'arrowDown',
+            text: `${m.valueEth.toFixed(0)} ETH (${m.alias})`,
+            size: 2
+        };
+    });
+
+    // Sort markers by time (required by Lightweight Charts)
+    displayMarkers.sort((a, b) => a.time - b.time);
+
+    try {
+        if (state.candleSeries && typeof state.candleSeries.setMarkers === 'function') {
+            state.candleSeries.setMarkers(displayMarkers);
         }
+    } catch (e) {
+        console.warn("Could not set markers:", e);
     }
 }
 
@@ -322,18 +329,19 @@ function getDisplayAddress(address) {
     return `<span class="mono-address">${address.slice(0, 6)}...${address.slice(-4)}</span>`;
 }
 
-function addTransactionToFeed(tx, valueEth) {
+function addTransactionToFeed(tx, valueEth, timestamp) {
     if (state.processedHashes.has(tx.hash)) return;
     state.processedHashes.add(tx.hash);
 
-    const time = new Date().toLocaleTimeString();
+    // Use blockchain timestamp if available, else fallback to locale (for live catch)
+    const timeDisplay = timestamp ? new Date(timestamp * 1000).toLocaleTimeString() : new Date().toLocaleTimeString();
     const item = document.createElement('div');
     item.className = 'tx-item';
 
     item.innerHTML = `
         <div class="tx-header">
             <span class="tx-value">🐋 ${valueEth.toFixed(2)} ETH</span>
-            <span class="tx-time">${time}</span>
+            <span class="tx-time">${timeDisplay}</span>
         </div>
         <div class="tx-details">
             <div class="tx-row">
@@ -385,7 +393,7 @@ async function scanNewBlocks() {
                             // Avoid duplicates globally
                             if (state.processedHashes.has(tx.hash)) return;
 
-                            addTransactionToFeed(tx, val);
+                            addTransactionToFeed(tx, val, timestamp);
                             updateStats(val);
                             addChartMarker(val, tx.from, timestamp);
 
@@ -448,7 +456,7 @@ async function scanHistory() {
                     return;
                 }
 
-                addTransactionToFeed(tx, val);
+                addTransactionToFeed(tx, val, timestamp);
                 updateStats(val);
                 // Skip markers update until full history is loaded
                 addChartMarker(val, tx.from, timestamp, true);
@@ -457,9 +465,8 @@ async function scanHistory() {
     }
 
     // Final markers sort and update
-    if (state.markers.length > 0) {
-        state.markers.sort((a, b) => a.time - b.time);
-        state.candleSeries.setMarkers(state.markers);
+    if (state.rawMarkers.length > 0) {
+        applyMarkers(state.timeframe);
     }
 
     elements.statusText.textContent = 'История загружена';
@@ -538,8 +545,11 @@ elements.clearBtn.addEventListener('click', () => {
     elements.txFeed.innerHTML = '<div class="empty-feed"><p>Лента очищена</p></div>';
     state.whalesCount = 0;
     state.totalEthMoved = 0;
+    state.rawMarkers = []; // Clear markers data too
+    state.processedHashes.clear();
     elements.whalesCount.textContent = '0';
     elements.totalEthMoved.textContent = '0 ETH';
+    if (state.candleSeries) state.candleSeries.setMarkers([]);
 });
 
 // Alias Modal Logic
