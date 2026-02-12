@@ -4,10 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Obsidian Pulse | ETH Whale Tracker</title>
+    <title>Pure Ether | ETH Whale Tracker</title>
+    <!-- Inter & JetBrains Mono Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Lightweight Charts & Lucide Icons -->
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
@@ -18,57 +25,40 @@
     <div class="page-frame">
         <div class="container">
             <header>
-                <div class="actions">
-                    <i data-lucide="zap" class="icon-primary"></i>
-                    <h1>Obsidian<span>Pulse</span></h1>
+                <div class="logo-section">
+                    <h1>Pure <span class="logo-accent">Ether</span></h1>
                 </div>
-
-                <div class="header-controls">
-                    <div class="status-indicator">
-                        <div class="dot" id="status-dot"></div>
-                        <span id="status-text">SYSTEM STANDBY</span>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <h3><i data-lucide="terminal"></i> TELEGRAM_LINK</h3>
-                    <div class="input-group">
-                        <input type="password" id="tg-bot-token" placeholder="BOT_TOKEN">
-                    </div>
-                    <div class="input-group">
-                        <div class="input-with-button">
-                            <input type="text" id="tg-chat-id" placeholder="CHAT_ID">
-                            <button id="test-tg-btn" class="btn-primary"
-                                style="padding: 0.5rem; width: auto; margin-top: 0;">TEST</button>
-                        </div>
-                    </div>
+                <div class="status-line">
+                    <div id="status-dot" class="dot"></div>
+                    <span id="status-text">Система в режиме ожидания</span>
                 </div>
             </header>
 
-            <main>
-                <!-- Главная колонка -->
-                <div class="main-column">
-                    <section class="stats-grid">
+            <main class="dashboard-grid">
+                <div class="main-content">
+                    <!-- Global Metrics -->
+                    <section class="stats-row">
                         <div class="card stat-card">
-                            <span class="stat-label">LATEST_BLOCK</span>
-                            <span class="stat-value" id="current-block">-</span>
+                            <span class="label">Latest Block</span>
+                            <div id="current-block" class="value">-</div>
                         </div>
                         <div class="card stat-card">
-                            <span class="stat-label">WHALES_DETECTED</span>
-                            <span class="stat-value" id="whales-count">0</span>
+                            <span class="label">Whales Detected</span>
+                            <div id="whales-count" class="value">0</div>
                         </div>
                         <div class="card stat-card">
-                            <span class="stat-label">TOTAL_VOLUME</span>
-                            <span class="stat-value" id="total-eth-moved">0 ETH</span>
+                            <span class="label">Total Volume</span>
+                            <div id="total-eth-moved" class="value">0 ETH</div>
                         </div>
                     </section>
 
-                    <section class="card chart-card" id="chart-section">
+                    <!-- Chart Section -->
+                    <section id="chart-section" class="card">
                         <div class="card-header">
-                            <h2><i data-lucide="activity"></i> LIVE_PULSE</h2>
-                            <div class="timeframe-selector">
-                                <button class="tf-btn" data-tf="minute">1M</button>
+                            <h2><i data-lucide="activity"></i> Live Pulse</h2>
+                            <div class="timeframe-picker">
                                 <button class="tf-btn active" data-tf="hour">1H</button>
+                                <button class="tf-btn" data-tf="minute">1M</button>
                                 <button class="tf-btn" data-tf="day">1D</button>
                             </div>
                         </div>
@@ -76,45 +66,76 @@
                     </section>
                 </div>
 
-                <!-- Боковая колонка -->
-                <aside class="side-column">
-                    <section class="card settings-card">
+                <aside class="sidebar">
+                    <!-- Configuration Card -->
+                    <section class="card">
                         <div class="card-header">
-                            <h2><i data-lucide="sliders"></i> CONFIG</h2>
+                            <h2><i data-lucide="settings"></i> Config</h2>
                         </div>
+
                         <div class="input-group">
-                            <label>ETH_THRESHOLD</label>
+                            <label>Etherscan API Key</label>
+                            <input type="password" id="api-key" placeholder="Your API Key">
+                        </div>
+
+                        <div class="input-group">
+                            <label>ETH Threshold</label>
                             <input type="number" id="eth-threshold" value="100">
                         </div>
+
                         <div class="input-group">
-                            <label>REFRESH_RATE (SEC)</label>
+                            <label>Refresh Rate (sec)</label>
                             <input type="number" id="refresh-interval" value="10">
                         </div>
-                        <div class="input-group">
-                            <label>ETHERSCAN_KEY</label>
-                            <input type="password" id="api-key" placeholder="API_KEY">
-                        </div>
 
-                        <div class="switch-group" style="margin: 1rem 0;">
+                        <!-- UX Improvement: Toggle Switch -->
+                        <div class="toggle-wrapper">
+                            <span class="toggle-label">Hide Exchanges</span>
                             <label class="switch">
-                                <input type="checkbox" id="filter-exchanges">
+                                <input type="checkbox" id="filter-exchanges" checked>
                                 <span class="slider"></span>
                             </label>
-                            <span style="font-size: 0.7rem; color: var(--text-dim);">HIDE_EXCHANGES</span>
                         </div>
 
-                        <button id="start-btn" class="btn-primary">INITIATE_SCAN</button>
-                        <button class="btn-primary" id="clear-feed"
-                            style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-dim); margin-top: 0.5rem;">CLEAR_CACHE</button>
+                        <div class="toggle-wrapper">
+                            <span class="toggle-label">History Mode</span>
+                            <label class="switch">
+                                <input type="checkbox" id="mode-history">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <button id="start-btn" class="btn-primary">
+                            <i data-lucide="play"></i> INITIATE_SCAN
+                        </button>
                     </section>
 
-                    <section class="card feed-card" style="margin-top: 2rem;">
+                    <!-- Telegram Card -->
+                    <section class="card">
                         <div class="card-header">
-                            <h2><i data-lucide="list"></i> FEED_LOG</h2>
+                            <h2><i data-lucide="send"></i> Telegram</h2>
                         </div>
-                        <div class="feed-container" id="tx-feed">
+                        <div class="input-group">
+                            <label>Bot Token</label>
+                            <input type="password" id="tg-bot-token" placeholder="...">
+                        </div>
+                        <div class="input-group">
+                            <label>Chat ID</label>
+                            <input type="text" id="tg-chat-id" placeholder="...">
+                        </div>
+                        <button id="test-tg-btn" class="btn-secondary">Test Connection</button>
+                    </section>
+
+                    <!-- Live Feed Card -->
+                    <section class="card">
+                        <div class="card-header">
+                            <h2><i data-lucide="list"></i> Whale Feed</h2>
+                            <button id="clear-feed" class="btn-secondary">Clear</button>
+                        </div>
+                        <div id="tx-feed">
                             <div class="empty-feed">
-                                <p>AWAITING_DATA...</p>
+                                <p style="text-align: center; color: var(--text-secondary); font-size: 0.8rem;">Ожидание
+                                    транзакций...</p>
                             </div>
                         </div>
                     </section>
@@ -123,16 +144,19 @@
         </div>
     </div>
 
-    <!-- Модалка для алиасов -->
-    <div id="alias-modal" class="modal">
-        <div class="modal-content card">
-            <h3>ASSIGN_IDENTITY</h3>
-            <p id="modal-address" class="mono-address" style="font-size: 0.7rem; margin: 1rem 0;"></p>
-            <input type="text" id="alias-input" placeholder="NAME">
-            <div class="modal-actions">
-                <button class="btn-primary" id="close-modal"
-                    style="background: transparent; border: 1px solid var(--text-dim); color: var(--text-dim);">CANCEL</button>
-                <button class="btn-primary" id="save-alias">SAVE</button>
+    <!-- Alias Modal -->
+    <div id="alias-modal">
+        <div class="modal-content">
+            <h3>Set Alias</h3>
+            <p id="modal-address"
+                style="word-break: break-all; font-family: 'JetBrains Mono'; font-size: 0.8rem; margin-bottom: 1rem; color: var(--text-secondary);">
+            </p>
+            <div class="input-group">
+                <input type="text" id="alias-input" placeholder="Enter name...">
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <button id="save-alias" class="btn-primary" style="flex: 1;">Save</button>
+                <button id="close-modal" class="btn-secondary">Cancel</button>
             </div>
         </div>
     </div>
