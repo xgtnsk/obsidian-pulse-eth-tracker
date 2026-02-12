@@ -109,23 +109,33 @@ elements.filterExchanges.addEventListener('change', (e) => {
 async function initChart() {
     const chartOptions = {
         layout: {
-            background: { color: '#000000' },
-            textColor: '#d1d4dc',
+            background: { color: '#ffffff' },
+            textColor: '#64748b',
             fontSize: 12,
-            fontFamily: 'JetBrains Mono',
+            fontFamily: 'Inter',
         },
         grid: {
-            vertLines: { color: 'rgba(42, 46, 57, 0.5)' },
-            horzLines: { color: 'rgba(42, 46, 57, 0.5)' },
+            vertLines: { color: '#f1f5f9' },
+            horzLines: { color: '#f1f5f9' },
         },
         crosshair: {
             mode: LightweightCharts.CrosshairMode.Normal,
+            vertLine: {
+                color: '#cbd5e1',
+                width: 1,
+                style: 2,
+            },
+            horzLine: {
+                color: '#cbd5e1',
+                width: 1,
+                style: 2,
+            },
         },
         rightPriceScale: {
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderColor: '#e2e8f0',
         },
         timeScale: {
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderColor: '#e2e8f0',
             timeVisible: true,
         },
     };
@@ -141,22 +151,22 @@ async function initChart() {
     resizeObserver.observe(document.getElementById('chart-container'));
 
     state.candleSeries = state.chart.addSeries(LightweightCharts.CandlestickSeries, {
-        upColor: '#00ffaa',
-        downColor: '#ff0055',
+        upColor: '#10b981',
+        downColor: '#ef4444',
         borderVisible: false,
-        wickUpColor: '#00ffaa',
-        wickDownColor: '#ff0055',
+        wickUpColor: '#10b981',
+        wickDownColor: '#ef4444',
     });
 
     state.volumeSeries = state.chart.addSeries(LightweightCharts.HistogramSeries, {
-        color: 'rgba(0, 245, 255, 0.3)',
+        color: '#e2e8f0',
         priceFormat: { type: 'volume' },
         priceScaleId: '',
     });
 
     state.volumeSeries.priceScale().applyOptions({
         scaleMargins: {
-            top: 0.8, // Volume histogram occupies the bottom 20%
+            top: 0.8,
             bottom: 0,
         },
     });
@@ -188,7 +198,7 @@ async function fetchChartData() {
                 volumes.push({
                     time: d.time,
                     value: d.volumeto,
-                    color: d.close >= d.open ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)'
+                    color: d.close >= d.open ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'
                 });
             });
 
