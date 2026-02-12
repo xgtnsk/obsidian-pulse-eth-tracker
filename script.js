@@ -77,8 +77,12 @@ const elements = {
 elements.apiKey.value = state.apiKey;
 elements.threshold.value = state.threshold;
 elements.interval.value = state.interval;
-elements.toggleChart.checked = state.chartVisible;
-elements.chartSection.style.display = state.chartVisible ? 'block' : 'none';
+if (elements.toggleChart) {
+    elements.toggleChart.checked = state.chartVisible;
+}
+if (elements.chartSection) {
+    elements.chartSection.style.display = state.chartVisible ? 'block' : 'none';
+}
 
 // New Settings Init
 elements.tgBotToken.value = state.telegramToken;
@@ -105,12 +109,14 @@ elements.filterExchanges.addEventListener('change', (e) => {
 async function initChart() {
     const chartOptions = {
         layout: {
-            background: { color: 'transparent' },
-            textColor: '#94a3b8',
+            background: { color: '#000000' },
+            textColor: '#d1d4dc',
+            fontSize: 12,
+            fontFamily: 'JetBrains Mono',
         },
         grid: {
-            vertLines: { color: 'rgba(255, 255, 255, 0.05)' },
-            horzLines: { color: 'rgba(255, 255, 255, 0.05)' },
+            vertLines: { color: 'rgba(42, 46, 57, 0.5)' },
+            horzLines: { color: 'rgba(42, 46, 57, 0.5)' },
         },
         crosshair: {
             mode: LightweightCharts.CrosshairMode.Normal,
@@ -125,6 +131,15 @@ async function initChart() {
     };
 
     state.chart = LightweightCharts.createChart(document.getElementById('chart-container'), chartOptions);
+
+    // Auto-resize handler
+    const resizeObserver = new ResizeObserver(entries => {
+        if (entries.length === 0 || !state.chart) return;
+        const { width, height } = entries[0].contentRect;
+        state.chart.applyOptions({ width, height });
+    });
+    resizeObserver.observe(document.getElementById('chart-container'));
+
     state.candleSeries = state.chart.addSeries(LightweightCharts.CandlestickSeries, {
         upColor: '#00ffaa',
         downColor: '#ff0055',
@@ -136,7 +151,7 @@ async function initChart() {
     state.volumeSeries = state.chart.addSeries(LightweightCharts.HistogramSeries, {
         color: 'rgba(0, 245, 255, 0.3)',
         priceFormat: { type: 'volume' },
-        priceScaleId: '', 
+        priceScaleId: '',
     });
 
     state.volumeSeries.priceScale().applyOptions({
@@ -425,12 +440,13 @@ async function scanHistory() {
 }
 
 // Event Handlers
-elements.toggleChart.addEventListener('change', (e) => {
+elements.toggleChart?.addEventListener('change', (e) => {
     state.chartVisible = e.target.checked;
     localStorage.setItem('eth_whale_chart_visible', state.chartVisible);
-    elements.chartSection.style.display = state.chartVisible ? 'block' : 'none';
+    if (elements.chartSection) {
+        elements.chartSection.style.display = state.chartVisible ? 'block' : 'none';
+    }
     if (state.chartVisible && state.chart) {
-        // Redraw or resize chart when shown
         state.chart.applyOptions({ width: elements.chartSection.clientWidth - 48 });
     }
 });

@@ -12,6 +12,8 @@
 
 <body>
     <div class="glass-bg"></div>
+    <div class="page-accent aura-1"></div>
+    <div class="page-accent aura-2"></div>
 
     <div class="page-frame">
         <div class="container">
@@ -36,7 +38,8 @@
                     <div class="input-group">
                         <div class="input-with-button">
                             <input type="text" id="tg-chat-id" placeholder="CHAT_ID">
-                            <button id="test-tg-btn" class="btn-primary" style="padding: 0.5rem; width: auto; margin-top: 0;">TEST</button>
+                            <button id="test-tg-btn" class="btn-primary"
+                                style="padding: 0.5rem; width: auto; margin-top: 0;">TEST</button>
                         </div>
                     </div>
                 </div>
@@ -91,7 +94,7 @@
                             <label>ETHERSCAN_KEY</label>
                             <input type="password" id="api-key" placeholder="API_KEY">
                         </div>
-                        
+
                         <div class="switch-group" style="margin: 1rem 0;">
                             <label class="switch">
                                 <input type="checkbox" id="filter-exchanges">
@@ -101,7 +104,8 @@
                         </div>
 
                         <button id="start-btn" class="btn-primary">INITIATE_SCAN</button>
-                        <button class="btn-primary" id="clear-feed" style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-dim); margin-top: 0.5rem;">CLEAR_CACHE</button>
+                        <button class="btn-primary" id="clear-feed"
+                            style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-dim); margin-top: 0.5rem;">CLEAR_CACHE</button>
                     </section>
 
                     <section class="card feed-card" style="margin-top: 2rem;">
@@ -126,7 +130,8 @@
             <p id="modal-address" class="mono-address" style="font-size: 0.7rem; margin: 1rem 0;"></p>
             <input type="text" id="alias-input" placeholder="NAME">
             <div class="modal-actions">
-                <button class="btn-primary" id="close-modal" style="background: transparent; border: 1px solid var(--text-dim); color: var(--text-dim);">CANCEL</button>
+                <button class="btn-primary" id="close-modal"
+                    style="background: transparent; border: 1px solid var(--text-dim); color: var(--text-dim);">CANCEL</button>
                 <button class="btn-primary" id="save-alias">SAVE</button>
             </div>
         </div>
